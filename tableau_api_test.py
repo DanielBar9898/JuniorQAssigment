@@ -1,5 +1,7 @@
 from tableau_api_helpers import auth, get_workbook_id, get_view_id, get_view_data
 import xml.etree.ElementTree as ET
+import csv
+import io
 
 def test_retrieve_data_from_view():
     token, site_id = auth()
@@ -8,7 +10,9 @@ def test_retrieve_data_from_view():
     response = get_view_data(token, site_id, view_id)
 
     assert response.status_code == 200
-    assert "<data>" in response.text or "<tsResponse" in response.text
+    assert "Username" in response.text  # column name
+    assert "," in response.text         # it's comma-separated
+    assert "\n" in response.text        # multiple lines
 
 
 
@@ -20,11 +24,11 @@ def test_filter_data_by_user():
 
     assert response.status_code == 200
 
-    # Parse XML and count rows
-    root = ET.fromstring(response.text)
-    rows = root.findall(".//row")
+    csv_file = io.StringIO(response.text)
+    reader = csv.DictReader(csv_file)
 
-    assert len(rows) > 0, "Expected at least one row for user"
+    rows = list(reader)
+    assert len(rows) > 0, "No rows found for the user"
 
 
 
