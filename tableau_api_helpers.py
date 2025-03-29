@@ -66,4 +66,16 @@ def get_view_id(token, site_id, workbook_id, view_name=None):
 
     raise Exception(f'View "{view_name or "[any]"}" not found')
 
+def get_view_data(token, site_id, view_id, filter_username=None):
+    url = f"https://dub01.online.tableau.com/api/3.4/sites/{site_id}/views/{view_id}/data"
+    if filter_username:
+        url += f"?vf_Username={filter_username}"
+
+    headers = {
+        "X-Tableau-Auth": token
+    }
+
+    response = requests.get(url, headers=headers)
+    return response
+
 
